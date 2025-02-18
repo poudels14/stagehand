@@ -27,7 +27,6 @@ export class OpenAIClient extends LLMClient {
   private client: OpenAI;
   private cache: LLMCache | undefined;
   private enableCaching: boolean;
-  public clientOptions: ClientOptions;
 
   constructor({
     enableCaching = false,
