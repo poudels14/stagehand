@@ -671,6 +671,7 @@ export class Stagehand {
   }
 }
 
+export { chromium };
 export * from "../types/browser";
 export * from "../types/log";
 export * from "../types/model";
