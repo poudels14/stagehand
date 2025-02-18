@@ -1,5 +1,5 @@
 import Browserbase from "@browserbasehq/sdk";
-import { Page, BrowserContext } from "../types/page";
+import { Page, BrowserContext, Browser } from "../types/page";
 import { z } from "zod";
 import { LLMProvider } from "../lib/llm/LLMProvider";
 import { LogLine } from "./log";
@@ -31,6 +31,8 @@ export interface ConstructorParams {
    */
   useAPI?: boolean;
   selfHeal?: boolean;
+  // if browser instance is passed, this will be used over LOCAL/BROWSERBASE
+  browser?: Browser & { context: BrowserContext };
 }
 
 export interface InitOptions {

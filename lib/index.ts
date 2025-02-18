@@ -9,7 +9,7 @@ import { z } from "zod";
 import { BrowserResult } from "../types/browser";
 import { LogLine } from "../types/log";
 import { AvailableModel } from "../types/model";
-import { BrowserContext, Page } from "../types/page";
+import { Browser, BrowserContext, Page } from "../types/page";
 import { GotoOptions } from "../types/playwright";
 import {
   ActOptions,
@@ -48,10 +48,14 @@ async function getBrowser(
   env: "LOCAL" | "BROWSERBASE" = "LOCAL",
   headless: boolean = false,
   logger: (message: LogLine) => void,
+  browser?: Browser & { context: BrowserContext },
   browserbaseSessionCreateParams?: Browserbase.Sessions.SessionCreateParams,
   browserbaseSessionID?: string,
 ): Promise<BrowserResult> {
-  if (env === "BROWSERBASE") {
+  if (browser) {
+    const context = browser.context;
+    return { browser, context, env };
+  } else if (env === "BROWSERBASE") {
     if (!apiKey) {
       logger({
         category: "init",
@@ -332,6 +336,7 @@ export class Stagehand {
   private usingAPI: boolean;
   private modelName: AvailableModel;
   private apiClient: StagehandAPI | undefined;
+  private browser: (Browser & { context: BrowserContext }) | undefined;
   public readonly selfHeal: boolean;
 
   constructor(
@@ -353,6 +358,7 @@ export class Stagehand {
       modelClientOptions,
       systemPrompt,
       useAPI,
+      browser,
       selfHeal = true,
     }: ConstructorParams = {
       env: "BROWSERBASE",
@@ -364,7 +370,7 @@ export class Stagehand {
       (process.env.ENABLE_CACHING && process.env.ENABLE_CACHING === "true");
     this.llmProvider =
       llmProvider || new LLMProvider(this.logger, this.enableCaching);
-    this.intEnv = env;
+    this.intEnv = browser ? "LOCAL" : env;
     this.apiKey = apiKey ?? process.env.BROWSERBASE_API_KEY;
     this.projectId = projectId ?? process.env.BROWSERBASE_PROJECT_ID;
     this.verbose = verbose ?? 0;
@@ -390,6 +396,7 @@ export class Stagehand {
     this.userProvidedInstructions = systemPrompt;
     this.usingAPI = useAPI ?? false;
     this.modelName = modelName ?? DEFAULT_MODEL_NAME;
+    this.browser = browser;
 
     if (this.usingAPI && env === "LOCAL") {
       throw new Error("API mode can only be used with BROWSERBASE environment");
@@ -468,6 +475,7 @@ export class Stagehand {
         this.env,
         this.headless,
         this.logger,
+        this.browser,
         this.browserbaseSessionCreateParams,
         this.browserbaseSessionID,
       ).catch((e) => {
