@@ -1,6 +1,6 @@
 {
   "name": "@baton-ai/stagehand",
-  "version": "1.12.0",
+  "version": "1.12.2",
   "description": "An AI web browsing framework focused on simplicity and extensibility.",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -28,13 +28,14 @@
     "build-js": "tsup lib/index.ts --dts",
     "build": "npm run lint && npm run build-dom-scripts && npm run build-js && npm run build-types",
     "lint": "npm run prettier && npm run eslint",
+    "prepublish": "rm -rf dist && pnpm build && cp package.json dist",
     "release": "npm run build && changeset publish",
     "release-canary": "npm run build && changeset version --snapshot && changeset publish --tag alpha"
   },
-  "files": [
-    "dist/**",
-    "lib/**"
-  ],
+  "publishConfig": {
+    "directory": "dist",
+    "linkDirectory": true
+  },
   "keywords": [],
   "author": "Browserbase",
   "license": "MIT",
